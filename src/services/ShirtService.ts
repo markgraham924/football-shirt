@@ -9,7 +9,6 @@ import {
   where, 
   orderBy, 
   serverTimestamp,
-  DocumentData
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
