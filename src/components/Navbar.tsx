@@ -43,16 +43,6 @@ const LogoText = styled(Typography)(({ theme }) => ({
   marginRight: '10px'
 }));
 
-const NavButton = styled(Button)(({ theme }) => ({
-  margin: '0 5px',
-  borderRadius: '8px',
-  textTransform: 'none',
-  fontWeight: 600,
-  '&:hover': {
-    backgroundColor: 'var(--hover-color)',
-  }
-}));
-
 const ThemeToggle = styled(Box)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',

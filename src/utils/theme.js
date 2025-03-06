@@ -11,6 +11,9 @@ export const toggleTheme = () => {
   // Update data-theme attribute on document element
   document.documentElement.setAttribute('data-theme', newTheme);
   
+  // Dispatch a custom event that components can listen to
+  window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: newTheme } }));
+  
   return newTheme;
 };
 
@@ -30,4 +33,9 @@ export const initializeTheme = () => {
   
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem(THEME_KEY, theme);
+};
+
+// Function to get current theme
+export const getCurrentTheme = () => {
+  return document.documentElement.getAttribute('data-theme') || 'light';
 };
