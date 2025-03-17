@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, stream } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import styles from '../styles/CameraCapture.module.css';
 import ShirtOverlay from './ShirtOverlay';
 
@@ -48,7 +48,7 @@ const CameraCapture = ({ onCapture, overlayType }) => {
         stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
   
   // Get crop dimensions based on overlay type
   const getCropDimensions = (canvasWidth, canvasHeight, type) => {
