@@ -150,6 +150,52 @@ const ShirtDetail: React.FC = () => {
                 Added on: {formattedDate}
               </Typography>
             </Box>
+
+            {/* Metadata Section */}
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+              Shirt Details
+            </Typography>
+            
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              {shirt.team && (
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    Team:
+                  </Typography>
+                  <Typography variant="body1">{shirt.team}</Typography>
+                </Grid>
+              )}
+              
+              {shirt.league && (
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    League:
+                  </Typography>
+                  <Typography variant="body1">{shirt.league}</Typography>
+                </Grid>
+              )}
+              
+              {shirt.season && (
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    Season:
+                  </Typography>
+                  <Typography variant="body1">{shirt.season}</Typography>
+                </Grid>
+              )}
+              
+              {shirt.kitType && (
+                <Grid item xs={6}>
+                  <Typography variant="body2" color="text.secondary">
+                    Kit Type:
+                  </Typography>
+                  <Typography variant="body1" sx={{ textTransform: 'capitalize' }}>
+                    {shirt.kitType}
+                  </Typography>
+                </Grid>
+              )}
+            </Grid>
           </Paper>
         </Grid>
       </Grid>

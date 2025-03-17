@@ -10,11 +10,18 @@ import {
   Alert,
   CircularProgress,
   ToggleButtonGroup,
-  ToggleButton
+  ToggleButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Autocomplete,
+  Grid
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { addShirt } from '../services/ShirtService';
 import InteractiveUpload from '../components/InteractiveUpload';
+import { teams, leagues } from '../data/footballData';
 
 const Upload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -24,8 +31,12 @@ const Upload: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  // New state for handling upload method
   const [uploadMethod, setUploadMethod] = useState<'traditional' | 'interactive'>('traditional');
+  const [selectedTeam, setSelectedTeam] = useState<string>('');
+  const [selectedLeague, setSelectedLeague] = useState<string>('');
+  const [season, setSeason] = useState<string>('');
+  const [kitType, setKitType] = useState<string>('');
+  
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -34,7 +45,6 @@ const Upload: React.FC = () => {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
       
-      // Create a preview URL
       const reader = new FileReader();
       reader.onload = () => {
         setPreviewUrl(reader.result as string);
@@ -43,29 +53,24 @@ const Upload: React.FC = () => {
     }
   };
 
-  // Handle toggling between upload methods
   const handleUploadMethodChange = (
     event: React.MouseEvent<HTMLElement>,
     newMethod: 'traditional' | 'interactive',
   ) => {
     if (newMethod !== null) {
       setUploadMethod(newMethod);
-      // Reset file and preview when changing methods
       setFile(null);
       setPreviewUrl(null);
     }
   };
 
-  // Handle completion of interactive upload
   const handleInteractiveComplete = (images: {
     front: string;
     back: string;
     label: string;
   }) => {
-    // Use the front image as the main preview
     setPreviewUrl(images.front);
     
-    // Convert the base64 image to a File object
     fetch(images.front)
       .then(res => res.blob())
       .then(blob => {
@@ -91,18 +96,29 @@ const Upload: React.FC = () => {
       setError('');
       setLoading(true);
       
-      // Use the addShirt service function to upload the shirt
-      await addShirt(shirtName, description, file);
+      await addShirt(
+        shirtName, 
+        description, 
+        file, 
+        {
+          team: selectedTeam,
+          league: selectedLeague,
+          season,
+          kitType
+        }
+      );
       
       setSuccess(true);
       
-      // Clear form after successful upload
       setShirtName('');
       setDescription('');
       setFile(null);
       setPreviewUrl(null);
+      setSelectedTeam('');
+      setSelectedLeague('');
+      setSeason('');
+      setKitType('');
       
-      // Redirect to profile after a brief success message
       setTimeout(() => {
         navigate('/profile');
       }, 1500);
@@ -181,6 +197,74 @@ const Upload: React.FC = () => {
               placeholder="Add details about your shirt..."
               disabled={loading}
             />
+          </Box>
+          
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              Shirt Metadata
+            </Typography>
+            
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  options={teams}
+                  value={selectedTeam}
+                  onChange={(_, newValue) => setSelectedTeam(newValue || '')}
+                  renderInput={(params) => 
+                    <TextField 
+                      {...params} 
+                      label="Team" 
+                      fullWidth 
+                      disabled={loading}
+                    />
+                  }
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <Autocomplete
+                  options={leagues}
+                  value={selectedLeague}
+                  onChange={(_, newValue) => setSelectedLeague(newValue || '')}
+                  renderInput={(params) => 
+                    <TextField 
+                      {...params} 
+                      label="League" 
+                      fullWidth 
+                      disabled={loading}
+                    />
+                  }
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Season"
+                  value={season}
+                  onChange={(e) => setSeason(e.target.value)}
+                  placeholder="e.g., 2022-2023"
+                  disabled={loading}
+                />
+              </Grid>
+              
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth disabled={loading}>
+                  <InputLabel>Kit Type</InputLabel>
+                  <Select
+                    value={kitType}
+                    label="Kit Type"
+                    onChange={(e) => setKitType(e.target.value)}
+                  >
+                    <MenuItem value="home">Home</MenuItem>
+                    <MenuItem value="away">Away</MenuItem>
+                    <MenuItem value="third">Third</MenuItem>
+                    <MenuItem value="goalkeeper">Goalkeeper</MenuItem>
+                    <MenuItem value="special">Special Edition</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
           </Box>
           
           {uploadMethod === 'traditional' ? (

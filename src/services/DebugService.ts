@@ -1,4 +1,4 @@
-import { getAuth } from 'firebase/auth';
+import { getAuth, signOut, signInAnonymously } from 'firebase/auth';
 import { ref, uploadBytes } from 'firebase/storage';
 import { storage } from '../firebase/config';
 
@@ -12,6 +12,7 @@ export async function testStoragePermissions() {
     }
     
     console.log('Current user ID:', user.uid);
+    console.log('Auth token:', await user.getIdToken());
     
     // Create a small test file
     const blob = new Blob(['test'], { type: 'text/plain' });
@@ -20,7 +21,8 @@ export async function testStoragePermissions() {
     // Test different path formats
     const paths = [
       `shirts/${user.uid}/test-${Date.now()}.txt`,
-      `shirts/test-${Date.now()}.txt`
+      `shirts/test-${Date.now()}.txt`,
+      `test-${Date.now()}.txt`  // Root level test
     ];
     
     const results = [];
@@ -45,6 +47,8 @@ export async function testStoragePermissions() {
       userId: user.uid,
       isAnonymous: user.isAnonymous,
       emailVerified: user.emailVerified,
+      authTime: user.metadata.creationTime,
+      lastSignInTime: user.metadata.lastSignInTime,
       results
     };
   } catch (error: any) {
@@ -53,5 +57,17 @@ export async function testStoragePermissions() {
       message: error.message,
       code: error.code
     };
+  }
+}
+
+export async function refreshAuth() {
+  const auth = getAuth();
+  try {
+    // Sign out and sign in anonymously to refresh the token
+    await signOut(auth);
+    await signInAnonymously(auth);
+    return { success: true, message: "Auth refreshed with anonymous account" };
+  } catch (error: any) {
+    return { success: false, message: error.message };
   }
 }
