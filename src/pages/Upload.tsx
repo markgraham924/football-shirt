@@ -8,10 +8,13 @@ import {
   TextField, 
   Paper,
   Alert,
-  CircularProgress
+  CircularProgress,
+  ToggleButtonGroup,
+  ToggleButton
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import { addShirt } from '../services/ShirtService';
+import InteractiveUpload from '../components/InteractiveUpload';
 
 const Upload: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -21,6 +24,8 @@ const Upload: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // New state for handling upload method
+  const [uploadMethod, setUploadMethod] = useState<'traditional' | 'interactive'>('traditional');
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
@@ -36,6 +41,37 @@ const Upload: React.FC = () => {
       };
       reader.readAsDataURL(selectedFile);
     }
+  };
+
+  // Handle toggling between upload methods
+  const handleUploadMethodChange = (
+    event: React.MouseEvent<HTMLElement>,
+    newMethod: 'traditional' | 'interactive',
+  ) => {
+    if (newMethod !== null) {
+      setUploadMethod(newMethod);
+      // Reset file and preview when changing methods
+      setFile(null);
+      setPreviewUrl(null);
+    }
+  };
+
+  // Handle completion of interactive upload
+  const handleInteractiveComplete = (images: {
+    front: string;
+    back: string;
+    label: string;
+  }) => {
+    // Use the front image as the main preview
+    setPreviewUrl(images.front);
+    
+    // Convert the base64 image to a File object
+    fetch(images.front)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], "shirt-front.jpg", { type: "image/jpeg" });
+        setFile(file);
+      });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,6 +134,25 @@ const Upload: React.FC = () => {
       )}
       
       <Paper elevation={3} sx={{ p: 3 }}>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            Choose Upload Method
+          </Typography>
+          <ToggleButtonGroup
+            value={uploadMethod}
+            exclusive
+            onChange={handleUploadMethodChange}
+            aria-label="upload method"
+          >
+            <ToggleButton value="traditional" aria-label="traditional upload">
+              Upload from Device
+            </ToggleButton>
+            <ToggleButton value="interactive" aria-label="interactive upload">
+              Take Photos
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+        
         <form onSubmit={handleSubmit}>
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle1" gutterBottom>
@@ -128,22 +183,28 @@ const Upload: React.FC = () => {
             />
           </Box>
           
-          <Box sx={{ mb: 3 }}>
-            <Button
-              variant="contained"
-              component="label"
-              disabled={loading}
-            >
-              Select Image
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleFileChange}
-                required
-              />
-            </Button>
-          </Box>
+          {uploadMethod === 'traditional' ? (
+            <Box sx={{ mb: 3 }}>
+              <Button
+                variant="contained"
+                component="label"
+                disabled={loading}
+              >
+                Select Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  required
+                />
+              </Button>
+            </Box>
+          ) : (
+            <Box sx={{ mb: 3 }}>
+              <InteractiveUpload onComplete={handleInteractiveComplete} />
+            </Box>
+          )}
           
           {previewUrl && (
             <Box sx={{ mb: 3 }}>

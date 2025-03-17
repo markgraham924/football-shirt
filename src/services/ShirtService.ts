@@ -20,9 +20,25 @@ export interface Shirt {
   userId: string;
   userDisplayName: string;
   createdAt: any;
+  team?: string;
+  league?: string;
+  season?: string;
+  kitType?: string;
 }
 
-export const addShirt = async (name: string, description: string, imageFile: File): Promise<string> => {
+interface ShirtMetadata {
+  team?: string;
+  league?: string;
+  season?: string;
+  kitType?: string;
+}
+
+export const addShirt = async (
+  name: string, 
+  description: string, 
+  imageFile: File,
+  metadata?: ShirtMetadata
+): Promise<string> => {
   try {
     if (!auth.currentUser) throw new Error('User not authenticated');
     
@@ -38,7 +54,11 @@ export const addShirt = async (name: string, description: string, imageFile: Fil
       imageUrl,
       userId: auth.currentUser.uid,
       userDisplayName: auth.currentUser.displayName || 'Unknown User',
-      createdAt: serverTimestamp()
+      createdAt: serverTimestamp(),
+      team: metadata?.team || null,
+      league: metadata?.league || null,
+      season: metadata?.season || null,
+      kitType: metadata?.kitType || null
     };
     
     const docRef = await addDoc(collection(db, "shirts"), shirtData);
